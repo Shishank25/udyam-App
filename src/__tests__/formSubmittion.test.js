@@ -79,7 +79,7 @@ test('goes from Step 1 → Step 2 and validates PAN', async () => {
   fireEvent.click(screen.getByRole('button', { name: /Validate PAN/i }));
     await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
-            'http://localhost:4000/submit-form',
+            'https://udyam-backend-production-0ab4.up.railway.app/submit-form',
             expect.any(Object)
         );
         expect(mockSetCurrentStep).toHaveBeenCalledWith(3);

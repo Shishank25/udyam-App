@@ -9,40 +9,61 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
 
+
   const stepFields = formSchema.filter(f => f.step === currentStep);
+
 
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: null }));
   };
 
+
   const validateField = (field, value) => {
+
     if (field.required && !value) return "This field is required.";
+
     if (field.pattern && value && !new RegExp(field.pattern).test(value))
       return "Invalid format.";
+
     if (field.maxlength && value && value.length > field.maxlength)
       return `Maximum length is ${field.maxlength} characters.`;
+
     return null;
   };
 
+
   const handleSubmit = async (e) => {
+
+
     e.preventDefault();
     if (currentStep === 3) {
       window.location.reload();
       return;
     }
+
+
     const newErrors = {};
+
+    // Front-End Validation of Field Values, except buttons
+
     stepFields.forEach(field => {
       if (field.type !== "submit") {
         const err = validateField(field, formData[field.name]);
         if (err) newErrors[field.name] = err;
       }
     });
+
+
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
-      if (currentStep === 1) {
-        setCurrentStep(2); // Move to Step 2
-      } else {
+
+
+    if (Object.keys(newErrors).length === 0) { 
+
+      // Set current step to 2 if No errors found
+      if (currentStep === 1) setCurrentStep(2);
+
+      else {
         try {
           const pack = {
                 aadhaarName: formData.aadhaarName,
@@ -51,17 +72,22 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
                 panNumber: formData.panNumber,
                 orgType: formData.orgType,
                 dobAsPerPan: formData.dobAsPerPan
-              };
-          console.log(pack);
+                };
+          // Pack the data as needed for the backend
+
           const res = await fetch("https://udyam-backend-production-0ab4.up.railway.app/submit-form", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(pack)
           });
+
           const data = await res.json();
+
           if (!res.ok) throw new Error(data.error);
           setCurrentStep(3);
-        } catch (err) {
+        } 
+
+        catch (err) {
           console.log(err);
           alert("Error: " + err.message);
         }
@@ -69,14 +95,24 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
     }
   };
 
+
   return (
+
     <div className="max-w-lg mx-auto p-6 md:p-12 md:border border-gray-400 rounded-[1.5rem] shadow space-y-6">
+
+      {/* Progress Bar */}
       <div className="w-full rounded-full border border-blue-500 h-4 overflow-hidden">
         <div className={`${currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'} bg-blue-500 h-4 duration-1000 transition-all`}/>
       </div>
+
+
       <h2 className="text-xl font-bold mb-4">Step {currentStep === 1? '1' : '2'} / 2</h2>
+
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {stepFields.map(field => {
+
+
           if (field.type === "text") {
             return (
               <div key={field.id}>
@@ -93,9 +129,11 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
                   pattern={field.pattern || null}
                   required
                 />
-                {errors[field.name] && (
+                <div className="h-4">
+                  {errors[field.name] && (
                   <p className="text-red-500 text-sm">{errors[field.name]}</p>
                 )}
+                </div>
               </div>
             );
           }
@@ -111,10 +149,13 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
                   onChange={(e) => handleChange(field.name, e.target.checked)}
                   required
                 />
+
                 <label htmlFor={field.id} className="text-justify">{field.label}</label>
-                {errors[field.name] && (
+                <div className="h-4">
+                  {errors[field.name] && (
                   <p className="text-red-500 text-sm">{errors[field.name]}</p>
                 )}
+                </div>
               </div>
             );
           }
@@ -136,9 +177,11 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
                     <option key={opt.value} value={opt.value} className="text-black">{opt.label}</option>
                   ))}
                 </select>
-                {errors[field.name] && (
+                <div className="h-4">
+                  {errors[field.name] && (
                   <p className="text-red-500 text-sm">{errors[field.name]}</p>
                 )}
+                </div>
               </div>
             );
           }
