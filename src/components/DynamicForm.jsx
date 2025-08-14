@@ -53,7 +53,7 @@ export default function DynamicForm({currentStep, setCurrentStep}) {
                 dobAsPerPan: formData.dobAsPerPan
               };
           console.log(pack);
-          const res = await fetch("https://udyam-backend-production-0ab4.up.railway.app/", {
+          const res = await fetch("https://udyam-backend-production-0ab4.up.railway.app/submit-form", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(pack)
